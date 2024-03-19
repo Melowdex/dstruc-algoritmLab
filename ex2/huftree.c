@@ -39,8 +39,10 @@ static int get_bit(uint8_t data[], int index) {
 huftree_t* huf_create(freq_data_t freq_data[], int size) {
 
     huftree_t* tree = malloc(sizeof(huftree_t));
+    splist_t* list = malloc(sizeof(splist_t));
 
     tree->letter_list = spl_create();
+
 
     for (int i = 0; i < size; i++){
 
@@ -49,6 +51,4 @@ huftree_t* huf_create(freq_data_t freq_data[], int size) {
 
         tree->letter_list = spl_insert_sorted(tree->letter_list, data, vglFrequentie);
     }
-
-    
 }
