@@ -1,0 +1,180 @@
+        -:    0:Source:splist_test.c
+        -:    1:#include "splist.h"
+        -:    2:#include <check.h>
+        -:    3:#include <stdlib.h>
+        -:    4:#include <stdio.h>
+        -:    5:
+        -:    6:char letters[] = {'A', 'B', 'C', 'D'};
+        -:    7:
+        4:    8:void setup(void) {
+        -:    9:    // Implement pre-test setup
+        4:   10:}
+        -:   11:
+        4:   12:void teardown(void) {
+        -:   13:    // Implement post-test teardown
+        4:   14:}
+        1:   15:START_TEST(test_ListFree)
+        -:   16:    {
+        -:   17:        // Test free NULL
+        1:   18:        splist_t *list = NULL;
+        1:   19:        spl_free(&list);
+       1*:   20:        ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
+        -:   21:
+        -:   22:        // Test free empty list
+        1:   23:        list = spl_create();
+        1:   24:        spl_free(&list);
+       1*:   25:        ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
+        -:   26:        
+        -:   27:        // Test free with one element
+        1:   28:        list = spl_create();
+        1:   29:        list = spl_insert_at_reference(list, &letters[0], NULL);
+        1:   30:        spl_free(&list);
+       1*:   31:        ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
+        -:   32:
+        -:   33:        // Test free with multiple elements
+        1:   34:        list = spl_create();
+        1:   35:        list = spl_insert_at_reference(list, &letters[0], NULL);
+        1:   36:        list = spl_insert_at_reference(list, &letters[1], NULL);
+        1:   37:        list = spl_insert_at_reference(list, &letters[2], NULL);
+        1:   38:        spl_free(&list);
+       1*:   39:        ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
+        -:   40:
+        1:   41:    }
+        -:   42:END_TEST
+        -:   43:
+        1:   44:START_TEST(test_listInsertAtReference)
+        -:   45:    {
+        -:   46:        // Test inserting in NULL list
+        1:   47:        splist_t *list = spl_insert_at_reference(NULL, &letters[0], NULL);
+       1*:   48:        ck_assert_msg(list == NULL, "Failure: expected list to be NULL");
+        -:   49:
+        -:   50:
+        -:   51:        // Test inserting elements
+        1:   52:        list = spl_create();
+        -:   53:        //subtest lenght of list
+       1*:   54:        ck_assert_msg(spl_size(list) == -2, "Failure: expected list to have size of -2, got: %d", spl_size(list));
+        -:   55:        
+        -:   56:        //test inserting an element in an empty list (case 1, empty list)
+        1:   57:        list = spl_insert_at_reference(list, &letters[2], NULL);
+       1*:   58:        ck_assert_msg(spl_size(list) == 1, "Failure: expected list to have size of 1, got a size of %d",
+        -:   59:                      spl_size(list));
+        -:   60:
+        -:   61:        //test inserting another element in list (case 2, reference == list->head)
+        1:   62:        splist_node_t* reference = spl_get_first_reference(list);  
+        1:   63:        list = spl_insert_at_reference(list, &letters[0], reference);
+       1*:   64:        ck_assert_msg(spl_size(list) == 2, "Failure: expected list to have size of 2, got a size of %d",
+        -:   65:                      spl_size(list));
+        -:   66:
+        -:   67:        //test inserting a third element (case 3, reference == NULL)
+        1:   68:        list = spl_insert_at_reference(list, &letters[3], NULL);
+       1*:   69:        ck_assert_msg(spl_size(list) == 3, "Failure: expected list to have size of 3, got a size of %d",
+        -:   70:                      spl_size(list));
+        -:   71:
+        -:   72:        //test inserting a fourth element (case 4, reference != NULL)
+        1:   73:        reference = spl_get_first_reference(list); 
+        1:   74:        reference = spl_get_next_reference(list, reference);    //reference points to 2nd element in list reference points wrong
+        1:   75:        list = spl_insert_at_reference(list, &letters[1], reference);
+       1*:   76:        ck_assert_msg(spl_size(list) == 4, "Failure: expected list to have size of 4, got a size of %d", spl_size(list));
+        -:   77:
+        -:   78:        //test if the elements are in right order
+        1:   79:        reference = spl_get_first_reference(list);
+        1:   80:        char* data = spl_get_element_at_reference(list, reference);
+       1*:   81:        ck_assert_msg(*data == letters[0], "Failure: expected element to be %c, got: %c", letters[0], *data);
+        -:   82:
+        1:   83:        reference = spl_get_next_reference(list, reference);
+        1:   84:        data = spl_get_element_at_reference(list, reference);
+       1*:   85:        ck_assert_msg(*data == letters[1], "Failure: expected element to be %c, got: %c", letters[1], *data);
+        -:   86:        
+        1:   87:        reference = spl_get_next_reference(list, reference);
+        1:   88:        data = spl_get_element_at_reference(list, reference);
+       1*:   89:        ck_assert_msg(*data == letters[2], "Failure: expected element to be %c, got: %c", letters[2], *data);
+        -:   90:        
+        1:   91:        reference = spl_get_next_reference(list, reference);
+        1:   92:        data = spl_get_element_at_reference(list, reference);
+       1*:   93:        ck_assert_msg(*data == letters[3], "Failure: expected element to be %c, got: %c", letters[3], *data);
+        -:   94:        
+        -:   95:        //check if reference == last_reference
+       1*:   96:        ck_assert_msg(reference == spl_get_last_reference(list), "Failure: expected pointer to be the last element");
+        -:   97:        
+        -:   98:        //free the list
+        1:   99:        spl_free(&list);
+       1*:  100:        ck_assert_msg(list == NULL, "Failure: expected list to be NULL");
+        1:  101:    }
+        -:  102:END_TEST
+        -:  103:
+        -:  104:
+        1:  105:START_TEST(test_getReferences)
+        -:  106:    {
+        -:  107:        //list setup
+        1:  108:        splist_t* list = spl_create();
+        1:  109:        list = spl_insert_at_reference(list, &letters[0], NULL);
+        1:  110:        list = spl_insert_at_reference(list, &letters[1], NULL);
+        1:  111:        list = spl_insert_at_reference(list, &letters[2], NULL);
+        -:  112:
+        1:  113:        splist_node_t* reference1 = spl_get_last_reference(list);
+        1:  114:        int (*compare)(char* x, char* y) = compareChar;
+        1:  115:        splist_node_t* reference2 = spl_get_reference_of_element(list, &letters[2], compare);
+        -:  116:
+       1*:  117:        ck_assert_msg(reference1 == reference2, "Failure: expected references to be the same");
+        -:  118:
+        1:  119:        spl_free(&list);
+        -:  120:
+        1:  121:    }
+        -:  122:END_TEST
+        -:  123:
+        1:  124:START_TEST(test_removeReferences)
+        -:  125:    {
+        -:  126:        //list setup
+        1:  127:        splist_t* list = NULL;
+       1*:  128:        ck_assert_msg(spl_remove_at_reference(list, NULL) == NULL, "Failure: expected NULL for a list that has not been created");
+        -:  129:
+        1:  130:        list = spl_create();
+       1*:  131:        ck_assert_msg(spl_remove_at_reference(list, NULL) == NULL, "Failure: expected NULL for a list with head == NULL");
+        -:  132:
+        1:  133:        list = spl_insert_at_reference(list, &letters[0], NULL);
+        1:  134:        list = spl_insert_at_reference(list, &letters[1], NULL);
+        1:  135:        list = spl_insert_at_reference(list, &letters[2], NULL);
+        1:  136:        list = spl_insert_at_reference(list, &letters[3], NULL);
+        -:  137:
+        -:  138:        //remove the last element
+        1:  139:        splist_node_t* lastRef = spl_get_last_reference(list);
+        1:  140:        element_t* element = spl_remove_at_reference(list, lastRef);
+       1*:  141:        ck_assert_msg(*element == letters[3], "Failure: expected element to be D at removal, got: %c", *element);
+        -:  142:
+        -:  143:        //check if references are good
+       1*:  144:        ck_assert_msg(lastRef != spl_get_last_reference(list), "Failure: expected references to not be the same");
+        -:  145:
+        -:  146:        //remove an element in the middle of the list
+        1:  147:        splist_node_t* reference = spl_get_first_reference(list);
+        1:  148:        reference = spl_get_next_reference(list, reference);
+        1:  149:        element = spl_remove_at_reference(list, reference);
+       1*:  150:        ck_assert_msg(*element == letters[1], "Failure: expected element to be B at removal, got: %c", *element);
+        -:  151:
+        -:  152:        //check removal for wrong reference
+       1*:  153:        ck_assert_msg(spl_remove_at_reference(list, reference) == NULL, "Failure: expected to be NULL");
+        -:  154:    
+        1:  155:        spl_free(&list);
+        1:  156:    }   
+        -:  157:END_TEST
+        -:  158:
+        5:  159:int main(void) {
+        5:  160:    Suite *s1 = suite_create("LIST_EX1");
+        5:  161:    TCase *tc1_1 = tcase_create("Core");
+        5:  162:    SRunner *sr = srunner_create(s1);
+        -:  163:    int nf;
+        -:  164:
+        5:  165:    suite_add_tcase(s1, tc1_1);
+        5:  166:    tcase_add_checked_fixture(tc1_1, setup, teardown);
+        5:  167:    tcase_add_test(tc1_1, test_ListFree);
+        5:  168:    tcase_add_test(tc1_1, test_listInsertAtReference);
+        5:  169:    tcase_add_test(tc1_1, test_getReferences);
+        5:  170:    tcase_add_test(tc1_1, test_removeReferences);
+        -:  171:    // Add other tests here...
+        -:  172:
+        5:  173:    srunner_run_all(sr, CK_VERBOSE);
+        -:  174:
+        1:  175:    nf = srunner_ntests_failed(sr);
+        1:  176:    srunner_free(sr);
+        -:  177:
+        1:  178:    return nf == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
+        -:  179:}

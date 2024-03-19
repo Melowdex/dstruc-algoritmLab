@@ -1,0 +1,182 @@
+        -:    0:Source:splist.c
+        -:    1:#include <stdlib.h>
+        -:    2:#include <string.h>
+        -:    3:#include "splist.h"
+        -:    4:
+        -:    5:typedef struct splist_node splist_node_t;
+        -:    6:struct splist_node {
+        -:    7:    splist_node_t* next;
+        -:    8:    element_t* data;
+        -:    9:};
+        -:   10:
+        -:   11:struct splist {
+        -:   12:    splist_node_t* head;
+        -:   13:    int length;
+        -:   14:};
+        -:   15:
+        3:   16:int compareChar(char* x, char* y){
+        3:   17:    return strcmp(x, y);
+        -:   18:}
+        -:   19:
+        -:   20:// Create and allocate memory for a new list.
+        6:   21:splist_t* spl_create(){
+        -:   22:
+        6:   23:    splist_t* new_list = malloc(sizeof(splist_t));
+        6:   24:    new_list->head = NULL;
+        6:   25:    new_list->length = 0; 
+        -:   26:
+        6:   27:    return new_list;
+        -:   28:}
+        -:   29:
+        7:   30:void spl_free(splist_t** list){
+        -:   31:
+        7:   32:    if (*list != NULL){
+        -:   33:
+        6:   34:        splist_node_t* curr = (**list).head;
+        -:   35:        splist_node_t* next;
+        -:   36:
+       19:   37:        while (curr != NULL){
+       13:   38:            next = curr->next;
+       13:   39:            free(curr);
+       13:   40:            curr = next;
+        -:   41:        }
+        -:   42:
+        6:   43:        free(*list);
+        -:   44:
+        6:   45:        *list = NULL;
+        -:   46:    }
+        7:   47:}
+        -:   48:
+        -:   49:// Returns the number of elements in the list.
+        5:   50:int spl_size(splist_t* list){
+        5:   51:    if (list->head == NULL)
+        1:   52:        return -2;
+        4:   53:    return list->length;
+        -:   54:}
+        -:   55:
+        -:   56:/*
+        -:   57: * pre: list exists with one element already in it   
+        -:   58: **/
+       27:   59:static splist_node_t* find_reference(splist_t* list, splist_node_t* reference){
+       27:   60:    splist_node_t* curr = list->head;
+       57:   61:    while (curr->next != reference){
+       35:   62:        curr = curr->next; 
+       35:   63:        if (reference != NULL && curr->next == NULL)
+        5:   64:            return NULL;
+        -:   65:    }
+       22:   66:    return curr;
+        -:   67:}
+        -:   68:
+        -:   69:/* Important note: to implement any list manipulation operator (insert, append, delete, sort, ...), always be aware of the following cases:
+        -:   70: * 1. empty list ==> avoid errors
+        -:   71: * 2. do operation at the start of the list ==> typically requires some special pointer manipulation
+        -:   72: * 3. do operation at the end of the list ==> typically requires some special pointer manipulation
+        -:   73: * 4. do operation in the middle of the list ==> default case with default pointer manipulation
+        -:   74: * ALWAYS check that you implementation works correctly in all these cases (check this on paper with list representation drawings!)
+        -:   75: **/
+       16:   76:splist_t* spl_insert_at_reference(splist_t* list, element_t* element, splist_node_t* reference){
+        -:   77:
+       16:   78:    if (list == NULL){
+        1:   79:        return NULL;
+        -:   80:    }
+        -:   81:    
+       15:   82:    splist_node_t* new_node = malloc(sizeof(splist_node_t));
+       15:   83:    new_node->data = element;
+       15:   84:    ++(list->length);
+        -:   85:
+       15:   86:    if (list->head == NULL) { // covers case 1
+        -:   87:        
+        5:   88:        list->head = new_node;
+        5:   89:        new_node->next = NULL;
+        -:   90:
+       10:   91:    } else if (list->head == reference) {  // covers case 2
+        -:   92:        
+        1:   93:        list->head = new_node;
+        1:   94:        new_node->next = reference;
+        -:   95:
+        -:   96:    } else {  //covers case 3 and 4
+        9:   97:        splist_node_t* prev_node = find_reference(list, reference);
+        -:   98:
+        9:   99:        if (prev_node != NULL){
+        9:  100:            new_node->next = reference;  
+        9:  101:            prev_node->next = new_node;
+        -:  102:        }
+        -:  103:    }
+       15:  104:    return list;
+        -:  105:}
+        -:  106:
+        -:  107:// Returns the element contained in the list node with reference 'reference' in the list.
+        4:  108:element_t* spl_get_element_at_reference(splist_t* list, splist_node_t* reference) {
+        -:  109:
+        4:  110:    if (list == NULL || list->head == NULL || reference == NULL)
+    #####:  111:        return NULL;
+        -:  112:    
+        4:  113:    splist_node_t* prev = find_reference(list, reference);  //to check if reference is in list
+        4:  114:    if (prev == NULL && reference != list->head)
+    #####:  115:        return NULL;
+        4:  116:    return reference->data;
+        -:  117:}
+        -:  118:
+        -:  119:// Removes the list node with reference 'reference' in the list.
+        5:  120:element_t* spl_remove_at_reference(splist_t* list, splist_node_t* reference) {
+        -:  121:
+        5:  122:    if (list == NULL || list->head == NULL || reference == NULL || find_reference(list, reference) == NULL)
+        3:  123:        return NULL;
+        -:  124:
+        2:  125:    element_t* data = NULL;
+        -:  126:
+        2:  127:    if (reference == list->head){
+    #####:  128:        list->head = reference->next;
+        -:  129:
+        -:  130:    } else {
+        2:  131:        splist_node_t* prev = find_reference(list, reference);
+        2:  132:        splist_node_t* next = reference->next;
+        -:  133:
+        2:  134:        prev->next = next;
+        -:  135:    } 
+        -:  136:
+        2:  137:    data = reference->data;
+        2:  138:    free(reference);
+        -:  139:
+        2:  140:    return data;  
+        -:  141:}
+        -:  142:
+        5:  143:splist_node_t* spl_get_next_reference(splist_t* list, splist_node_t* reference){
+        5:  144:    if (list == NULL || list->head == NULL || reference == NULL)
+    #####:  145:        return NULL;
+        -:  146:
+        5:  147:    splist_node_t* prev = find_reference(list, reference);  //to make sure that reference is in list
+        5:  148:    if (prev == NULL && reference != list->head)
+    #####:  149:        return NULL;
+        5:  150:    return reference->next;
+        -:  151:}
+        -:  152:
+        4:  153:splist_node_t* spl_get_first_reference(splist_t* list){
+        4:  154:    if (list == NULL)
+    #####:  155:        return NULL;
+        -:  156:
+        4:  157:    return list->head;
+        -:  158:}
+        -:  159:
+        4:  160:splist_node_t* spl_get_last_reference(splist_t* list){
+        4:  161:    if (list == NULL || list->head == NULL)
+    #####:  162:        return NULL;
+        -:  163:
+        4:  164:    return find_reference(list, NULL); 
+        -:  165:}
+        -:  166:
+        1:  167:splist_node_t* spl_get_reference_of_element(splist_t* list, element_t* element, int (*compare)(element_t* x, element_t* y)){
+        1:  168:    if (list == NULL || list->head == NULL)
+    #####:  169:        return NULL;
+        -:  170:    
+        1:  171:    splist_node_t* curr = list->head;
+        -:  172:    int result;
+        -:  173:
+        3:  174:    while (curr != NULL){
+        3:  175:        result = compare(curr->data, element);
+        3:  176:        if (result == 0)
+        1:  177:            return curr;
+        2:  178:        curr = curr->next;
+        -:  179:    }
+    #####:  180:    return NULL;
+        -:  181:}
