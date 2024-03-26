@@ -2,6 +2,7 @@
 #define _HUFTREE_H
 
 #include <stdint.h>
+#include <string.h>
 
 typedef struct {
     char letter;

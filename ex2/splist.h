@@ -1,13 +1,16 @@
 #ifndef _SPLIST_H
 #define _SPLIST_H
 #include "huftree.h"
+#include <stdio.h>
+#include <stdlib.h>
 
-typedef struct {
+typedef struct element element_t;
+struct element {
     element_t* parent;
     element_t* left;
     element_t* right;
     freq_data_t* data;
-} element_t;
+};
 
 /** splist_t is a struct containing at least a head pointer to the start of the list; */
 typedef struct splist splist_t;
