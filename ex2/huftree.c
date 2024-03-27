@@ -58,27 +58,65 @@ huftree_t* huf_create(freq_data_t freq_data[], int size) {
         tree->letter_list = spl_insert_sorted(tree->letter_list, data, vglFrequentie);
         list = spl_insert_sorted(list, data, vglFrequentie);
     }
+    if (size >= 2){
+        element_t* node1, *node2, *new_node;
+        while (1) {
+        
+            node1 = spl_remove_at_reference(list, spl_get_first_reference(list));
+            node2 = spl_remove_at_reference(list, spl_get_first_reference(list));
+    
+            if (node2 == NULL){ //end of list (tree created);
+                tree->root = node1;
+                spl_free(&list);
+                break;
+            }
+    
+            new_node->data->frequency = node1->data->frequency + node2->data->frequency;
+    
+            new_node->left = node1;         //idk of ik null moet toevoegen
+            node1->parent = new_node;
+    
+            new_node->right = node2;
+            node2->parent = new_node;
+    
+            spl_insert_sorted(list, new_node, vglFrequentie);
+        }
+    }
 
-    element_t* node1, *node2, *new_node;
-    while (1) {
+    return tree;
+}
 
-        node1 = spl_remove_at_reference(list, spl_get_first_reference(list));
-        node2 = spl_remove_at_reference(list, spl_get_first_reference(list));
+void del_nodes(element_t* node){
+    if (node->left == NULL && node->right == NULL){
+        //delete node
+        element_t* parent = node->parent;
+        if (parent == NULL){
+            free(node->data);
+            free(node);
+        } else{
+            if (parent->left == node){
+                parent->left = NULL;
+            }else{
+                parent->right = NULL;
+            }
+            free(node->data);
+            free(node);
 
-        if (node2 == NULL){ //end of list (tree created);
-            tree->root = node1;
-            spl_free(&list);
-            break;
+            del_nodes(parent);
         }
 
-        new_node->data->frequency = node1->data->frequency + node2->data->frequency;
-
-        new_node->left = node1;
-        node1->parent = new_node;
-
-        new_node->right = node2;
-        node2->parent = new_node;
-
-        spl_insert_sorted(list, new_node, vglFrequentie);
+    } else if (node->left == NULL && node->right != NULL){    
+        del_nodes(node->right);
+    } else {    //always left if both options are avalible or if left != NULL
+        del_nodes(node->left);
     }
+}
+
+void huf_free(huftree_t **tree){
+
+    del_nodes((*tree)->root);
+
+    element_t* root = (*tree)->root;
+
+    free(&((*tree)->letter_list));
 }

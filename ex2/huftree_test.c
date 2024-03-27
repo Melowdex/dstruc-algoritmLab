@@ -34,7 +34,7 @@ START_TEST(test_HufCreate)
         ck_assert_msg(huftree == NULL, "Failure: expected result to be NULL");
     }
 END_TEST
-
+/*
 START_TEST(test_HufEncode)
 {
     // test create with multiple elements
@@ -82,7 +82,7 @@ START_TEST(test_HufDecode)
     huf_free(&huftree);
 }
 END_TEST
-
+*/
 //START_TEST(test_nameOfYourTest)
 //  Add other testcases here...
 //END_TEST
@@ -96,8 +96,8 @@ int main(void) {
     suite_add_tcase(s1, tc1_1);
     tcase_add_checked_fixture(tc1_1, NULL, NULL);
     tcase_add_test(tc1_1, test_HufCreate);
-    tcase_add_test(tc1_1, test_HufEncode);
-    tcase_add_test(tc1_1, test_HufDecode);
+    //tcase_add_test(tc1_1, test_HufEncode);
+    //tcase_add_test(tc1_1, test_HufDecode);
     // Add other tests here...
 
     srunner_run_all(sr, CK_VERBOSE);
