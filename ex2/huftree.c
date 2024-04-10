@@ -1,5 +1,6 @@
 #include "huftree.h"
 #include "splist.h"
+#define MAX_LENGTH 50
 
 struct huftree {
     splist_t* letter_list;  //points to original list
@@ -14,7 +15,7 @@ int vglFrequentie(element_t* x, element_t* y){
 
 int vglChar(element_t* x, element_t* y){
     int res = (x->data->letter > y->data->letter) ? 1 : -1;
-    res = (x->data->frequency == y->data->frequency) ? 0 : res;
+    res = (x->data->letter == y->data->letter) ? 0 : res;
     return res;
 }
 
@@ -45,6 +46,13 @@ static int get_bit(uint8_t data[], int index) {
 huftree_t* huf_create(freq_data_t freq_data[], int size) {
 
     huftree_t* tree = malloc(sizeof(huftree_t));
+
+    if (size == 0){
+        tree->letter_list = NULL;
+        tree->root = NULL;
+        return tree;
+    }
+
     splist_t* list = spl_create();      
 
     tree->letter_list = spl_create();
@@ -54,69 +62,128 @@ huftree_t* huf_create(freq_data_t freq_data[], int size) {
 
         element_t* data = malloc(sizeof(element_t));
         data->data = &freq_data[i];
+        data->left = NULL;
+        data->right = NULL;
+        data->parent = NULL;
 
         tree->letter_list = spl_insert_sorted(tree->letter_list, data, vglFrequentie);
         list = spl_insert_sorted(list, data, vglFrequentie);
     }
-    if (size >= 2){
-        element_t* node1, *node2, *new_node;
-        while (1) {
-        
-            node1 = spl_remove_at_reference(list, spl_get_first_reference(list));
-            node2 = spl_remove_at_reference(list, spl_get_first_reference(list));
+    if (size == 1){
+        tree->root = spl_get_element_at_reference(tree->letter_list, spl_get_first_reference(tree->letter_list));
+        element_t* node = tree->root;
+        node->left = NULL;
+        node->right = NULL;
+        node->parent = NULL;
+        spl_free(&list);
+        return tree;
+    }
+    element_t* node1, *node2;
+    element_t* new_node;
+    while (1) {
     
-            if (node2 == NULL){ //end of list (tree created);
-                tree->root = node1;
-                spl_free(&list);
-                break;
-            }
-    
-            new_node->data->frequency = node1->data->frequency + node2->data->frequency;
-    
-            new_node->left = node1;         //idk of ik null moet toevoegen
-            node1->parent = new_node;
-    
-            new_node->right = node2;
-            node2->parent = new_node;
-    
-            spl_insert_sorted(list, new_node, vglFrequentie);
+        node1 = spl_remove_at_reference(list, spl_get_first_reference(list));
+        node2 = spl_remove_at_reference(list, spl_get_first_reference(list));
+
+        if (node2 == NULL){ //end of list (tree created);
+            node1->parent = NULL;
+            tree->root = node1;
+            spl_free(&list);
+            return tree;
         }
+
+        new_node = malloc(sizeof(element_t));  
+        new_node->data = malloc(sizeof(new_node->data));
+
+        new_node->data->frequency = node1->data->frequency + node2->data->frequency;
+
+        new_node->left = node1;         
+        node1->parent = new_node;
+
+        new_node->right = node2;
+        node2->parent = new_node;
+
+        spl_insert_sorted(list, new_node, vglFrequentie);
     }
 
-    return tree;
 }
 
 void del_nodes(element_t* node){
-    if (node->left == NULL && node->right == NULL){
-        //delete node
-        element_t* parent = node->parent;
-        if (parent == NULL){
-            free(node->data);
-            free(node);
-        } else{
-            if (parent->left == node){
-                parent->left = NULL;
-            }else{
-                parent->right = NULL;
-            }
-            free(node->data);
-            free(node);
 
-            del_nodes(parent);
-        }
-
-    } else if (node->left == NULL && node->right != NULL){    
-        del_nodes(node->right);
-    } else {    //always left if both options are avalible or if left != NULL
+    if (node->left != NULL){
         del_nodes(node->left);
     }
+    if (node->right != NULL){
+        del_nodes(node->right);
+    }
+    //free(node->data);
+    free(node);
 }
 
 void huf_free(huftree_t **tree){
+    if ((*tree)->root != NULL){
+        del_nodes((*tree)->root);
+        spl_free(&((*tree)->letter_list));
+    }
+    free(*tree);
+    *tree = NULL;
+}
 
-    del_nodes((*tree)->root);
+void reverse(uint8_t* array, int start, int end){
+    uint8_t temp;
 
-    element_t* root = (*tree)->root;
+    while(start < end){
+        temp = get_bit(array, start);
 
-    free(&((*tree)->letter_list));
+        if (get_bit(array, end) == 1){
+            set_bit(array, start++);
+        } else{
+            clear_bit(array, start++);
+        }
+
+        if (temp == 1){
+            set_bit(array, end--);
+        } else{
+            clear_bit(array, end--);
+        }
+    }
+}
+
+int huf_encode(huftree_t *tree, char* input, uint8_t* output){
+    int n = 0, i = 0;
+
+    while(*input != '\0'){
+        element_t* data = malloc(sizeof(element_t));
+        data->data = malloc(sizeof(freq_data_t));
+        data->data->letter = *input;
+        
+        element_t* node = spl_get_element_at_reference(tree->letter_list, spl_get_reference_of_element(tree->letter_list, data, vglChar));
+        
+        free(data->data);
+        free(data);
+        
+        if(node != NULL){
+            element_t* n_node = node->parent;
+            i = 0;
+
+            while(n_node != NULL){
+
+                if (n_node->left == node){
+                    set_bit(output, n+i);
+                } else{
+                    clear_bit(output, n+i);
+                }
+                
+                i++;
+                node = n_node;
+                n_node = node->parent;
+            }
+
+            reverse(output, n, n+i-1);
+            n += i;
+        }
+        ++(input);
+    }
+
+    return n;
 }

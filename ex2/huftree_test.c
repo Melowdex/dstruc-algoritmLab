@@ -1,4 +1,5 @@
 #include "huftree.h"
+#include "splist.h"
 #include <check.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -28,21 +29,23 @@ START_TEST(test_HufCreate)
         ck_assert_msg(huftree == NULL, "Failure: expected result to be NULL");
 
         // test create with multiple elements
-        huftree = huf_create(freq_data, 5);
+        huftree = huf_create(freq_data, 6);
         ck_assert_msg(huftree != NULL, "Failure: expected result to be not NULL");
         huf_free(&huftree);
         ck_assert_msg(huftree == NULL, "Failure: expected result to be NULL");
     }
 END_TEST
-/*
+
 START_TEST(test_HufEncode)
 {
     // test create with multiple elements
     huftree_t* huftree = huf_create(freq_data, 6);
     ck_assert_msg(huftree != NULL, "Failure: expected result to be not NULL");
     uint8_t out[10];
+    
     int amount = huf_encode(huftree,"r",out);
     ck_assert_int_eq(amount,4);
+    printf("%d\n", out[2]);
     ck_assert_int_eq(out[0] & 0b00001111, 0b00001110);
 
     amount = huf_encode(huftree,"ra",out);
@@ -56,7 +59,7 @@ START_TEST(test_HufEncode)
     huf_free(&huftree);
 }
 END_TEST
-
+/*
 START_TEST(test_HufDecode)
 {
     // test create with multiple elements
@@ -96,7 +99,7 @@ int main(void) {
     suite_add_tcase(s1, tc1_1);
     tcase_add_checked_fixture(tc1_1, NULL, NULL);
     tcase_add_test(tc1_1, test_HufCreate);
-    //tcase_add_test(tc1_1, test_HufEncode);
+    tcase_add_test(tc1_1, test_HufEncode);
     //tcase_add_test(tc1_1, test_HufDecode);
     // Add other tests here...
 

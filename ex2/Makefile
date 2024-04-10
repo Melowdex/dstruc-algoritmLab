@@ -25,16 +25,16 @@ cppcheck : $(SOURCE) $(HEADERS)
 
 valgrind : compile
 	@echo "$(TITLE_COLOR)Running Valgrind :$(NO_COLOR)"
-	CK_FORK=no valgrind --leak-check=full --track-origins=yes ./build/splist_test
+	CK_FORK=no valgrind --leak-check=full --track-origins=yes ./build/huftree_test
 
-debug: build/main
+debug: build/huftree_test
 	@echo "$(TITLE_COLOR)running UNIT TEST in debuf mode$(NO_COLOR)"
-	CK_FORK=no gdb -q build/splist_test
+	CK_FORK=no gdb -q build/huftree_test
 
 coverage :
 	@mkdir -p build
-	gcc $(SOURCE)  -O0  --coverage -o build/splist_test $(FLAGS) -dumpbase ''
-	./build/splist_test
+	gcc $(SOURCE)  -O0  --coverage -o build/huftree_test $(FLAGS) -dumpbase ''
+	./build/huftree_test
 	gcov -o ./build -p  $(SOURCE)
 	mv *.gcov build
 	lcov --capture --directory ./build --output-file ./build/coverage.info
