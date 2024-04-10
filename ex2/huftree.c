@@ -173,7 +173,7 @@ int huf_encode(huftree_t *tree, char* input, uint8_t* output){
                 } else{
                     clear_bit(output, n+i);
                 }
-                
+
                 i++;
                 node = n_node;
                 n_node = node->parent;
@@ -186,4 +186,35 @@ int huf_encode(huftree_t *tree, char* input, uint8_t* output){
     }
 
     return n;
+}
+
+char* huf_decode(huftree_t *tree, uint8_t* code, int size){
+    char result[MAX_LENGTH];
+    int index = 0;
+
+    element_t* curr_node = tree->root;
+
+    for (int i = 0; i<size; i++){
+        if (get_bit(code, i) == 1 && curr_node->left != NULL){
+            curr_node = curr_node->left;
+        }else if (get_bit(code, i) == 0 && curr_node->right != NULL){
+            curr_node = curr_node->right;
+        }else{
+            result[index++] = curr_node->data->letter;
+            curr_node = tree->root;
+            --i;
+        }
+    }
+
+    result[index++] = curr_node->data->letter; //last letter in array
+
+    result[index] = '\0';
+
+    char* res = malloc(index*sizeof(char));
+    
+    for (int i = 0; i<=index; i++){
+        res[i] = result[i];
+    }
+
+    return res;
 }

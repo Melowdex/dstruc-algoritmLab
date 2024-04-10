@@ -45,7 +45,6 @@ START_TEST(test_HufEncode)
     
     int amount = huf_encode(huftree,"r",out);
     ck_assert_int_eq(amount,4);
-    printf("%d\n", out[2]);
     ck_assert_int_eq(out[0] & 0b00001111, 0b00001110);
 
     amount = huf_encode(huftree,"ra",out);
@@ -59,7 +58,7 @@ START_TEST(test_HufEncode)
     huf_free(&huftree);
 }
 END_TEST
-/*
+
 START_TEST(test_HufDecode)
 {
     // test create with multiple elements
@@ -85,7 +84,7 @@ START_TEST(test_HufDecode)
     huf_free(&huftree);
 }
 END_TEST
-*/
+
 //START_TEST(test_nameOfYourTest)
 //  Add other testcases here...
 //END_TEST
@@ -100,7 +99,7 @@ int main(void) {
     tcase_add_checked_fixture(tc1_1, NULL, NULL);
     tcase_add_test(tc1_1, test_HufCreate);
     tcase_add_test(tc1_1, test_HufEncode);
-    //tcase_add_test(tc1_1, test_HufDecode);
+    tcase_add_test(tc1_1, test_HufDecode);
     // Add other tests here...
 
     srunner_run_all(sr, CK_VERBOSE);
