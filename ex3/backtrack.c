@@ -56,7 +56,7 @@ int read_file(int** distances, game** matches){
 }
 
 int check_conditions(int n, int* afstanden, game* games, int* teams, int i, int j, int* result, int* best_result, int** home_teams, int** away_teams){
-    if (i > 0){
+    if (i > 0){ //scrap results, afstanden and teams 
         int prev_team = (*home_teams)[i-1];
         if (prev_team == games[(i*2*(n-1))+j].home_team || prev_team == games[(i*2*(n-1))+j].away_team || (*away_teams)[i-1] == games[(i*2*(n-1))+j].home_team || (*away_teams)[i-1] == games[(i*2*(n-1))+j].away_team){
             return 0;
@@ -118,7 +118,7 @@ int solve(int n, int* afstanden, game* games, int* teams, int i, int* result, in
 int backtrack(int n, int* afstanden, game* games){
     int teams[n];
 
-    for (int i = 0; i < n; i++){
+    for (int i = 0; i < n; i++){  //didnt use (scrap it)
         teams[i] = i+1;
     }
 
