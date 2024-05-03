@@ -56,8 +56,13 @@ int read_file(int** distances, game** matches){
     return n;
 }
 
+<<<<<<< HEAD
 int check_conditions(int n, int* afstanden, game* games, int* matches_played, int i, int j, int* best_result, int** home_teams, int** away_teams){
     if (i > 0){
+=======
+int check_conditions(int n, int* afstanden, game* games, int* teams, int i, int j, int* result, int* best_result, int** home_teams, int** away_teams){
+    if (i > 0){ //scrap results, afstanden and teams 
+>>>>>>> d183e0bb22b2f1f4c2fcb30a24f2595907de33a4
         int prev_team = (*home_teams)[i-1];
         if (prev_team == games[(i*2*(n-1))+j].home_team || prev_team == games[(i*2*(n-1))+j].away_team || (*away_teams)[i-1] == games[(i*2*(n-1))+j].home_team || (*away_teams)[i-1] == games[(i*2*(n-1))+j].away_team){
             return 0;
@@ -115,6 +120,14 @@ int solve(int n, int* afstanden, game* games, int** matches_played, int i, int* 
 
 int backtrack(int n, int* afstanden, game* games){
 
+<<<<<<< HEAD
+=======
+    for (int i = 0; i < n; i++){  //didnt use (scrap it)
+        teams[i] = i+1;
+    }
+
+    int* result;
+>>>>>>> d183e0bb22b2f1f4c2fcb30a24f2595907de33a4
     int* best_result;
     *best_result = 1000000;
     int* home_teams = malloc(2*(n-1) * sizeof(int));
