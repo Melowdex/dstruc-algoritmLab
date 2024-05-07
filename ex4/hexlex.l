@@ -1,0 +1,31 @@
+ /* code block at begin of output file */
+ /* mind the space before every comment! */
+%{
+    #include "hash.h"
+    int result;
+
+    #define HEX   -1     /* tokens zelf def als je zonder yacc werkt*/
+    #define REG   -2
+%}
+ /* definitions section (declare names for complex regex's) */
+
+
+%%
+ /* rules section */
+
+%%
+ /* user code block at end of output file */
+
+int main(int argc,char *argv[]) {
+    int code;
+
+    ht_init();
+    do {
+        code = yylex();
+        if (code == REG) printf("index : %4d | %s\n", result, yytext);
+        if (code == HEX) printf("getal : %4d | %s\n", result, yytext);
+    } while( code != 0 );
+
+    ht_print();
+    return 0;
+}
