@@ -11,9 +11,9 @@ typedef struct {
 } game;
 
 int read_file(int** distances, game** matches);
-int check_conditions(int n, int* afstanden, game* games, int** matches_played, int i, int j, int* best_result, int** home_teams, int** away_teams);
+int check_conditions(int n, int* afstanden, game* games, game** matches_played, int i, int j, int* best_result, int** home_teams, int** away_teams);
 int check_for_all_teams(int n, int** home_teams);
-int solve(int n, int* afstanden, game* games, int** matches_played, int i, int* best_result, int** home_teams, int** away_teams, int** distances);
+int solve(int n, int* afstanden, game* games, game** matches_played, int i, int* best_result, int** home_teams, int** away_teams, int** distances);
 int backtrack(int n, int* afstanden, game* games);
 
 int read_file(int** distances, game** matches){
@@ -56,7 +56,7 @@ int read_file(int** distances, game** matches){
     return n;
 }
 
-int check_conditions(int n, int* afstanden, game* games, int** matches_played, int i, int j, int* best_result, int** home_teams, int** away_teams){
+int check_conditions(int n, int* afstanden, game* games, game** matches_played, int i, int j, int* best_result, int** home_teams, int** away_teams){
     if (i > 0){
         int prev_team = (*home_teams)[i-1];
         if (prev_team == games[(i*2*(n-1))+j].home_team || prev_team == games[(i*2*(n-1))+j].away_team || (*away_teams)[i-1] == games[(i*2*(n-1))+j].home_team || (*away_teams)[i-1] == games[(i*2*(n-1))+j].away_team){
@@ -84,7 +84,7 @@ int check_for_all_teams(int n, int** home_teams){
     return 1;
 }
 
-int solve(int n, int* afstanden, game* games, int** matches_played, int i, int* best_result, int** home_teams, int** away_teams, int** distances){
+int solve(int n, int* afstanden, game* games, game** matches_played, int i, int* best_result, int** home_teams, int** away_teams, int** distances){
     if (i == 2*(n-1)){ 
         if (check_for_all_teams(n, home_teams) == 0){
             return 0;
@@ -97,6 +97,7 @@ int solve(int n, int* afstanden, game* games, int** matches_played, int i, int* 
             *best_result = sum;
             for (int j = 0; j < 2*(n-1); j++){
                 ((*matches_played)[j].home_team) = (*home_teams)[j];
+                ((*matches_played)[j].away_team) = (*away_teams)[j];
             }
         }
 
@@ -123,13 +124,19 @@ int backtrack(int n, int* afstanden, game* games){
     int* home_teams = malloc(2*(n-1) * sizeof(int));
     int* away_teams = malloc(2*(n-1) * sizeof(int));
     int* distances = malloc((2*(n-1)-1) * sizeof(int));
-    int* matches_played = malloc(2*(n-1) * sizeof(game));
+    game* matches_played = malloc(2*(n-1) * sizeof(game));
 
     solve(n, afstanden, games, &matches_played, 0, best_result, &home_teams, &away_teams, &distances);
 
+
+    for (int i = 0; i < 2*(n-1); i++){
+        printf("home: %d, away: %d\n", matches_played[i].home_team, matches_played[i].away_team);
+    }
+    
     free(home_teams);
     free(away_teams);
     free(distances);
+    free(matches_played);
     return *best_result;
 }
 
