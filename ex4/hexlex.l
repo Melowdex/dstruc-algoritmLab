@@ -8,10 +8,16 @@
     #define REG   -2
 %}
  /* definitions section (declare names for complex regex's) */
-
+hex    0x[0-9a-fA-F]+
+var    [a-zA-Z]+
 
 %%
  /* rules section */
+{hex}  { result = strtol(yytext, NULL, 0); 
+        return HEX; };
+
+{var}   { result = ht_install(yytext);
+        return REG; };
 
 %%
  /* user code block at end of output file */
