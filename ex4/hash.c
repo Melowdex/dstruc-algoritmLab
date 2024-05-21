@@ -68,12 +68,12 @@ static int indexWithLinearProbe(char* text){
         return -1;
     }
 
-    if (strlen(tabel[hash].naam) == 0){
+    if (strlen(tabel[hash].naam) == 0 || strcmp(tabel[hash].naam, text) == 0){
         return hash;
     }else{
         while (1){
-            --hash;
-            if (strlen(tabel[hash].naam) == 0){
+            --hash; 
+            if (strlen(tabel[hash].naam) == 0 ){
                 return hash;
             } 
             if (hash == 0)
